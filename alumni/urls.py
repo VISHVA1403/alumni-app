@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,12 +24,13 @@ from library.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+     path("chat/", include("chat.urls")),
     path('alumni/register/', RegisterAPIView.as_view(), name='auth_register'),
     path('alumni/login/', LoginAPIView.as_view(), name='auth_login'),
     path('alumni/change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('alumni/change-username/', ChangeUserName.as_view(), name='change-username'),
-    path('alumni/userid/<int:user_id>/', GetUsernameByUserId.as_view(), name='get-username'),
-
+    path('alumni/get-user/<int:user_id>/', GetUsernameByUserId.as_view(), name='get-username'),
+    path('alumni/Follow/<int:followed_id>/<str:action>/', FollowAndFollowing.as_view(), name='user-profile'),
     path('alumni/profile/',ProfileAPIView.as_view(),name = 'CreteProfile'),
     path('alumni/profiles/<str:username>/', othersProfile.as_view(), name='profile-detail'),
     path('alumni/profiles/<int:user_id>/', UserProfileView.as_view(), name='user-profile'),

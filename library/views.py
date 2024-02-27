@@ -153,7 +153,16 @@ class ProfileAPIView(generics.ListCreateAPIView):
         try:
             profile = UserProfile.objects.get(user=user)
             serializer = ProfileSerializer(profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            user_data = {
+                'username': user.username,
+                'email': user.email,
+        # Add any other user-related data you want to include
+                    }
+            compound_data = {
+                'profile': serializer.data,
+                'user': user_data,  # Send user-related data instead of the entire 'user' object
+            }
+            return Response(compound_data, status=status.HTTP_200_OK)
         except UserProfile.DoesNotExist:
             return Response({"error": "User profile does not exist."}, status=status.HTTP_404_NOT_FOUND)
 class UserProfileView(APIView):
@@ -177,7 +186,7 @@ class LoginAPIView(generics.GenericAPIView):
         if serializer.is_valid():
             user =serializer.validated_data['user'] # type: ignore
             token,created =Token.objects.get_or_create(user=user)
-            return Response(token.key  , status=status.HTTP_200_OK)
+            return Response(token.key , status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -323,6 +332,32 @@ class GetUsernameByUserId(APIView):
         try:
             user = User.objects.get(id=user_id)
             username = user.username
-            return Response({'user_id': user_id, 'username': username}, status=status.HTTP_200_OK)
+            return Response(user, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class FollowAndFollowing(APIView):
+    def post(self, request, followed_id, action):
+        current_user = UserFollow.objects.get_or_create(user=request.user)[0]
+        request_user = UserFollow.objects.get_or_create(user=User.objects.get(pk=followed_id))[0]
+        
+        if action == 'follow':
+            current_user.following.add(request_user.user)
+            request_user.followers.add(current_user.user)
+            serializer = UserFollowSerializer([current_user, request_user], many=True)
+            return Response(serializer.data, status=200)
+        elif action == 'unfollow':
+            try:
+                user_follow_instance = UserFollow.objects.get(user=current_user, following=request_user.user)
+                follower_instance = UserFollow.objects.get(user=request_user, followers=current_user.user)
+                follower_instance.delete()
+                user_follow_instance.delete()
+                serializer = UserFollowSerializer([current_user, request_user], many=True)
+                return Response(serializer.data, status=200)
+            except UserFollow.DoesNotExist:
+                return Response({'error': 'You were not following the user already'}, status=400)
+        else:
+            return Response({'error': 'Invalid action'}, status=400)
+
+

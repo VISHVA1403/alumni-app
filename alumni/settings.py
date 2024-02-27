@@ -25,20 +25,20 @@ SECRET_KEY = 'django-insecure-a__ch530t$0+=lyg+6ty&wj&fn(qai#2fy+7j!3z9l4pu!!mx^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['37ec-121-200-52-130.ngrok-free.app','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['1a5c-121-200-52-130.ngrok-free.app','127.0.0.1','localhost']
 
 
 
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-
+    'chat',
     'library',
     'rest_framework',
     "rest_framework.authtoken",
@@ -97,10 +97,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'alumni.wsgi.application'
 
-
+ASGI_APPLICATION = 'alumni.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -169,7 +176,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-mail.outlook.com'  # Outlook SMTP server
 EMAIL_PORT = 587  # Port for Outlook's SMTP server
 EMAIL_USE_TLS = True  # Use TLS encryption
-
 EMAIL_HOST_USER = 'projectalumniid@outlook.com'  # Your Outlook email address
 EMAIL_HOST_PASSWORD = 'Selvakumar@1'  # Your Outlook email password
 DEFAULT_FROM_EMAIL = 'projectalumniid@outlook.com'  # Your Outlook email address

@@ -129,3 +129,7 @@ class PostingSerializer(serializers.ModelSerializer):
 
 
 
+class UserFollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFollow
+        fields = "__all__"
